@@ -1,0 +1,11 @@
+{
+  "_comment": "Официальные домены для поиска похожих адресов (lookalike). Пользователям не показываются. Дополните под первый рынок после решения раздела 21 ТЗ.",
+  "brands": {
+    "telegram": ["telegram.org", "t.me", "telegram.me"],
+    "google": ["google.com"],
+    "apple": ["apple.com", "icloud.com"],
+    "paypal": ["paypal.com"],
+    "binance": ["binance.com"],
+    "whatsapp": ["whatsapp.com"]
+  }
+}

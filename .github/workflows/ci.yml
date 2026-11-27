@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: pauza
+          POSTGRES_PASSWORD: pauza
+          POSTGRES_DB: pauza_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U pauza" --health-interval 5s --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgresql+asyncpg://pauza:pauza@localhost:5432/pauza_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Tesseract
+        run: sudo apt-get update && sudo apt-get install -y tesseract-ocr tesseract-ocr-rus fonts-dejavu-core
+      - name: Install
+        run: pip install -e ".[dev]" pip-audit
+      - name: Migrations apply cleanly
+        env:
+          DATABASE_URL: postgresql+asyncpg://pauza:pauza@localhost:5432/pauza_test
+        run: |
+          alembic upgrade head
+          alembic check
+          alembic downgrade base
+      - name: Lint
+        run: ruff check .
+      - name: Tests
+        run: pytest -q
+      - name: Dependency audit
+        run: pip-audit --skip-editable
