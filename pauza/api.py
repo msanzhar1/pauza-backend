@@ -12,7 +12,7 @@ from redis.asyncio import Redis
 
 from pauza import metrics
 from pauza.config import Settings, get_settings
-from pauza.db.session import Database, make_engine
+from pauza.db.session import Database, engine_from_settings
 from pauza.logs import configure_logging, get_logger, new_correlation_id, pseudonymize
 from pauza.queue import UpdateCipher, UpdateQueue
 
@@ -33,7 +33,7 @@ def create_app(settings: Settings | None = None, redis: Redis | None = None, db:
     async def lifespan(app: FastAPI):
         configure_logging(settings.app_log_level, settings.id_hash_key.get_secret_value())
         app.state.redis = redis or Redis.from_url(settings.redis_url)
-        app.state.db = db or Database(make_engine(settings.database_url))
+        app.state.db = db or Database(engine_from_settings(settings))
         cipher = UpdateCipher(settings.queue_encryption_key.get_secret_value(), settings.temp_data_ttl_seconds)
         app.state.queue = UpdateQueue(app.state.redis, settings.idempotency_ttl_seconds, cipher)
         app.state.ip_rl = app.state.redis.register_script(_IP_RL_LUA)

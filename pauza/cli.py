@@ -43,9 +43,9 @@ async def set_webhook() -> None:
 async def publish_ruleset(author: str, description: str) -> None:
     from pauza.analysis.rules import RULESET_VERSION, ruleset_digest
     from pauza.db.models import AuditEvent, RuleVersion
-    from pauza.db.session import Database, make_engine
+    from pauza.db.session import Database, engine_from_settings
 
-    db = Database(make_engine(_settings().database_url))
+    db = Database(engine_from_settings(_settings()))
     digest = ruleset_digest()
     try:
         async with db.session() as s:
@@ -63,10 +63,10 @@ async def publish_ruleset(author: str, description: str) -> None:
 
 
 async def import_regions_cmd(path: str, author: str) -> None:
-    from pauza.db.session import Database, make_engine
+    from pauza.db.session import Database, engine_from_settings
     from pauza.regions import import_regions
 
-    db = Database(make_engine(_settings().database_url))
+    db = Database(engine_from_settings(_settings()))
     try:
         async with db.session() as s:
             n = await import_regions(s, path, author)

@@ -38,6 +38,12 @@ class Settings(BaseSettings):
 
     database_url: str
     redis_url: str
+    # Пул соединений на процесс. Для Supabase учитывайте лимит клиентов пулера на ваш план.
+    database_pool_size: int = 5
+    database_max_overflow: int = 5
+    # session — обычный Postgres или пулер Supabase в режиме сессий (порт 5432);
+    # transaction — пулер в режиме транзакций (порт 6543): без prepared statements и без своего пула.
+    database_pool_mode: Literal["session", "transaction"] = "session"
 
     # Лимиты входа (раздел 7.1)
     max_text_length: int = 10_000

@@ -4,6 +4,7 @@ from logging.config import fileConfig
 
 from alembic import context
 from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy.pool import NullPool
 
 from pauza.db.models import Base
 
@@ -33,7 +34,8 @@ def _do_run(connection) -> None:
 
 
 async def run_migrations_online() -> None:
-    engine = create_async_engine(_url())
+    # Миграции запускайте через прямое подключение или пулер в режиме сессий (не транзакций).
+    engine = create_async_engine(_url(), poolclass=NullPool)
     async with engine.connect() as conn:
         await conn.run_sync(_do_run)
     await engine.dispose()

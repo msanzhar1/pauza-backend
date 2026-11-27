@@ -61,7 +61,8 @@ Telegram ──HTTPS──▶ API (FastAPI) ──Lua: idempotency key + LPUSH�
 | `ID_HASH_KEY` | Ключ keyed hash для Telegram ID и псевдонимов в логах. **Смена ключа отвяжет всех пользователей от их настроек** |
 | `CALLBACK_SIGNING_KEY` | Подпись inline-кнопок (HMAC, срок действия, привязка к пользователю) |
 | `QUEUE_ENCRYPTION_KEY` | Fernet-ключ шифрования очереди |
-| `DATABASE_URL`, `REDIS_URL` | `postgresql+asyncpg://...`, `redis://...` |
+| `DATABASE_URL`, `REDIS_URL` | `postgresql+asyncpg://...` (для Supabase с `?ssl=require`), `redis://...` |
+| `DATABASE_POOL_SIZE`, `DATABASE_MAX_OVERFLOW`, `DATABASE_POOL_MODE` | Пул соединений на процесс (5 + 5) и режим `session` / `transaction` для пулеров вроде Supabase |
 | `DEFAULT_REGION_CODE` | Регион новых пользователей; `KG` для первого рынка. Контакты показываются только после импорта проверенного справочника |
 | `MAX_TEXT_LENGTH`, `MAX_IMAGE_BYTES`, `MAX_IMAGE_PIXELS`, `MAX_URLS_PER_CHECK` | Лимиты входа |
 | `RATE_LIMIT_WINDOW_SECONDS`, `RATE_LIMIT_MAX_CHECKS`, `RATE_LIMIT_DAILY_MAX_CHECKS` | Лимит проверок на пользователя (по умолчанию 10 за 10 минут и 50 в сутки). Команды не лимитируются |
@@ -140,6 +141,8 @@ ruff check .
 Нагрузочные тесты (20 Update/с, всплеск 100 Update/с) в репозиторий не входят: их нужно прогнать на стенде, близком к production.
 
 ## Развёртывание (production)
+
+Пошаговая инструкция для Supabase (PostgreSQL) + Railway (API, воркер, Redis): [`docs/deploy.md`](docs/deploy.md).
 
 1. Образ один (`Dockerfile`); процессы: `api` (команда по умолчанию), `worker` (`python -m pauza.worker`), миграции (`alembic upgrade head`) отдельным шагом.
 2. HTTPS-ingress перед `api`; наружу публикуется только `/webhooks/telegram` и при необходимости `/health/*`. Порт метрик `9100` — только во внутреннюю сеть.

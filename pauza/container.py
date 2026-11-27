@@ -11,7 +11,7 @@ from pauza.analysis.service import Analyzer
 from pauza.analysis.urls import OfficialDomains, UrlAnalyzer
 from pauza.bot import BotHandler
 from pauza.config import ConfigError, Settings
-from pauza.db.session import Database, make_engine
+from pauza.db.session import Database, engine_from_settings
 from pauza.integrations.llm import LLMExplainer
 from pauza.integrations.ocr import build_ocr
 from pauza.integrations.reputation import UrlReputationProvider
@@ -76,7 +76,7 @@ def build_rate_limiter(settings: Settings, redis: Redis) -> RateLimiter:
 
 def build_container(settings: Settings, redis: Redis | None = None, db: Database | None = None, telegram: TelegramClient | None = None) -> Container:
     redis = redis or Redis.from_url(settings.redis_url)
-    db = db or Database(make_engine(settings.database_url))
+    db = db or Database(engine_from_settings(settings))
     telegram = telegram or TelegramClient(
         settings.telegram_bot_token.get_secret_value(),
         settings.telegram_api_base,

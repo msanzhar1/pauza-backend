@@ -273,3 +273,19 @@ def test_defaults_are_safe():
     s = make_settings()
     assert s.llm_enabled is False and s.url_reputation_enabled is False
     assert s.temp_data_ttl_seconds <= 900 and s.default_region_code is None
+
+
+# --- Engine / pooler ---------------------------------------------------------------------
+
+def test_engine_kwargs_session_and_transaction_modes():
+    from sqlalchemy.pool import NullPool
+
+    from pauza.db.session import engine_kwargs
+
+    url = "postgresql+asyncpg://u:p@h:5432/db?ssl=require"
+    session = engine_kwargs(url, 3, 2, "session")
+    assert session["pool_size"] == 3 and session["max_overflow"] == 2 and "poolclass" not in session
+    tx = engine_kwargs(url, 3, 2, "transaction")
+    assert tx["poolclass"] is NullPool
+    assert tx["connect_args"] == {"statement_cache_size": 0, "prepared_statement_cache_size": 0}
+    assert "pool_size" not in engine_kwargs("sqlite+aiosqlite:///:memory:")

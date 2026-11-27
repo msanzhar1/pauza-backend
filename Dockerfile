@@ -24,4 +24,6 @@ USER pauza
 
 EXPOSE 8000 9100
 # Процесс выбирается командой: api | worker | migrate (см. docker-compose.yml)
-CMD ["uvicorn", "pauza.api:app_factory", "--factory", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers", "--no-access-log"]
+# Порт берётся из $PORT (его задают Railway и другие PaaS), по умолчанию 8000.
+# За прокси платформы задайте FORWARDED_ALLOW_IPS, чтобы uvicorn доверял X-Forwarded-For.
+CMD ["/bin/sh", "-c", "exec uvicorn pauza.api:app_factory --factory --host 0.0.0.0 --port ${PORT:-8000} --proxy-headers --no-access-log"]
