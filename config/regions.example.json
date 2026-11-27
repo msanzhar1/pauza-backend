@@ -1,0 +1,16 @@
+{
+  "_comment": "ФОРМАТ справочника. Значения ниже вымышлены и не должны импортироваться в production. Каждая запись требует https-источник и дату ручной проверки.",
+  "resources": [
+    {
+      "region_code": "XX",
+      "resource_type": "POLICE_REPORT",
+      "display_name": "Название службы",
+      "official_phone": "000",
+      "official_url": "https://police.example",
+      "description": "Короткое описание, когда обращаться.",
+      "source_url": "https://police.example/contacts",
+      "verified_at": "2026-11-27",
+      "active": true
+    }
+  ]
+}
