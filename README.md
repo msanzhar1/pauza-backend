@@ -62,6 +62,7 @@ Telegram ──HTTPS──▶ API (FastAPI) ──Lua: idempotency key + LPUSH�
 | `CALLBACK_SIGNING_KEY` | Подпись inline-кнопок (HMAC, срок действия, привязка к пользователю) |
 | `QUEUE_ENCRYPTION_KEY` | Fernet-ключ шифрования очереди |
 | `DATABASE_URL`, `REDIS_URL` | `postgresql+asyncpg://...`, `redis://...` |
+| `DEFAULT_REGION_CODE` | Регион новых пользователей; `KG` для первого рынка. Контакты показываются только после импорта проверенного справочника |
 | `MAX_TEXT_LENGTH`, `MAX_IMAGE_BYTES`, `MAX_IMAGE_PIXELS`, `MAX_URLS_PER_CHECK` | Лимиты входа |
 | `RATE_LIMIT_WINDOW_SECONDS`, `RATE_LIMIT_MAX_CHECKS`, `RATE_LIMIT_DAILY_MAX_CHECKS` | Лимит проверок на пользователя (по умолчанию 10 за 10 минут и 50 в сутки). Команды не лимитируются |
 | `WEBHOOK_IP_RATE_LIMIT_PER_MINUTE` | Лимит запросов к webhook с одного адреса |
@@ -119,7 +120,7 @@ python -m pauza.cli set-webhook
 - Каталог индикаторов и уровни: [`docs/INDICATORS.md`](docs/INDICATORS.md).
 - Правила — код в `pauza/analysis/rules.py`, версия `RULESET_VERSION`. При изменении: поднять версию, записать в [`docs/RULES_CHANGELOG.md`](docs/RULES_CHANGELOG.md), после деплоя выполнить
   `python -m pauza.cli publish-ruleset --author "Имя" --description "Что изменилось"` (пишет `rule_versions` и `audit_events`). Каждая проверка хранит `analysis_version`.
-- Справочник регионов пуст по умолчанию. Формат — `config/regions.example.json` (значения вымышлены). Каждая запись требует https-источник и дату ручной проверки, иначе импорт отклоняется:
+- Справочник регионов в БД пуст по умолчанию. Черновик для Кыргызстана — `config/regions/KG.draft.json`, формат-пример — `config/regions.example.json` (значения вымышлены). Каждая запись требует https-источник и дату ручной проверки, иначе импорт отклоняется:
   ```bash
   python -m pauza.cli validate-regions config/regions.json
   python -m pauza.cli import-regions config/regions.json --author "Имя"
@@ -163,7 +164,7 @@ ruff check .
 
 До их утверждения код работает на безопасных значениях по умолчанию.
 
-1. **Первый рынок и региональные контакты** — справочник пуст, контакты не выдумываются.
+1. **Первый рынок** — Кыргызстан (`DEFAULT_REGION_CODE=KG`). Черновик контактов — `config/regions/KG.draft.json`: экстренные службы (112), милиция (102), отдел защиты прав потребителей Нацбанка. Записи не активны и не импортируются, пока у каждой не проставлена дата ручной проверки (`verified_at`) и `active: true`; что именно проверить, написано в `review_notes`. Официального контакта для заявлений о киберпреступлениях не найдено.
 2. **OCR** — локальный Tesseract (`rus+eng`).
 3. **LLM** — выключен (`LLM_ENABLED=false`); есть адаптер со строгой схемой и защитой от понижения риска, но без конкретного провайдера.
 4. **Срок неактивности** — `USER_INACTIVITY_DAYS` пуст (не удаляем по неактивности).
